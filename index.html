@@ -1,49 +1,284 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>Optionals and Eithers</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <h2>Optionals, Eithers, and CoProducts</h2>
+            <h4>In Java</h4>
+        </section>
+        <section>
+            <h3>Abusing Syntax</h3>
+            <p>
+                Lambda
+            </p>
+            <pre data-trim data-noescape>
+A -> B</pre>
+            <p>
+                Code that accepts a Lamba
+            </p>
+            <pre data-trim data-noescape>
+Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</pre>
+        </section>
+        <section>
+            <section>
+                <h2>The Basics</h2>
+            </section>
+            <section>
+                <h3>Map </h3>
+                <p>Given Stream of A and a function from A to B, we can make a Stream of B</p>
+                <pre data-trim data-noescape>
+Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</pre>
+                <p>Sadly this method is only on the new Stream class, not List</p>
+            </section>
+            <section>
+                <h3>Advantages of Map</h3>
+                <ul>
+                    <li>Easy statelessness</li>
+                    <li>Separation of (A -> B) from Stream logic</li>
+                    <li>No need to concern yourself about empty Streams</li>
+                </ul>
+            </section>
+            <section>
+                <h3>flatMap</h3>
+                <p>Given a Stream of A and a function from A to Stream of B, we can make a Stream of B</p>
+                <pre data-trim data-noescape>
+Stream&lt;A&gt;#flatMap :: (A -> Stream&lt;B&gt;) -> Stream&lt;B&gt;</pre>
+                <p>What if we just used map?</p>
+                <pre data-trim data-noescape>
+Stream&lt;A&gt;#map :: (A -> Stream&lt;B&gt;) -> Stream&lt;Stream&lt;B&gt&gt;</pre>
+            </section>
+            <section>
+                <h3>Advantages of flatMap</h3>
+                <ul>
+                    <li>Statelessness for nearly free again</li>
+                    <li>Easy expansion and collapse</li>
+                    <li>No need to un-nest or manage flattening logic yourself</li>
+                </ul>
+            </section>
+            <section>
+                <h3>Questions?</h3>
+                <p>This should be old-hat, but this is a good time to stop and check in.</p>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h3>Optional</h3>
+                <ul>
+                    <li>New in Java 8</li>
+                    <li>Represents the possibility of a value</li>
+                    <li>Obliges user to check for presence or absence</li>
+                </ul>
+            </section>
+            <section>
+                <h3>Making an Optional</h3>
+                <p>Optionals can be constructed in one of three ways</p>
+                <ul>
+                    <li>Optional.empty()</li>
+                    <li>Optional.of(x)</li>
+                    <li>Optional.ofNullable(x)</li>
+                </ul>
+                <p>I recommend you avoid Optional.of</p>
+            </section>
+            <section>
+                <h3>Optional#map</h3>
+                <pre data-trim data-noescape>
+Optional&lt;A&gt;#map :: (A -> B) -> Optional&lt;B&gt;;</pre>
+                <p>Chain together a series of transformations without checking for presence or absence until the
+                    end.</p>
+                <p>If the Optional is empty, map is a no-op.</p>
+            </section>
+            <section>
+                <h3>Optional#flatMap</h3>
+                <pre data-trim data-noescape>
+Optional&lt;A&gt;#flatMap :: (A -> Optional&lt;B&gt;) -> Optional&lt;B&gt;;</pre>
+                <p>Chain together a series of transformations that might each fail, without checking for presence or
+                    absence explicitly.</p>
+                <p>flatMap is a no-op if the Optional is empty.</p>
+            </section>
+            <section>
+                <h3>Why</h3>
+                <p>By now you should see the similarities between Stream and Optional.</p>
+                <p>In both cases, you don't have to check to see if the stream/optional is empty, and you can chain
+                    together operations that independent of each other.</p>
+            </section>
+            <section>
+                <h3>How do I get the value out?</h3>
+                <pre data-trim data-noescape>
+Optional&lt;A&lt;#isPresent :: boolean;
+Optional&lt;A&gt;#get :: A; // Throws exceptions!
+Optional&lt;A&gt;#orElse :: A -> A;</pre>
+            </section>
+            <section>
+                <h3>Questions?</h3>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h3>Either</h3>
+                <p>Either is a concept lifted from ML.</p>
+                <p>No official version, but several third party versions are available.</p>
+            </section>
+            <section>
+                <h3>What is an Either?</h3>
+                <p>Either is usually represented an Either&lt;L, R&gt;</p>
+                <p>It represents either the existence of a L (left), or a R (right)</p>
+                <p>L and R may be the same types, or they might be distinct</p>
+                <pre data-trim data-noescape>
+Either.left(L);
+Either.right(R);</pre>
+            </section>
+            <section>
+                <h3>A note on accidents of History</h3>
+                <p>Eithers commonly represent success/failure scenarios</p>
+                <p>Traditionally, left is used for failure, right for success</p>
+            </section>
+            <section>
+                <h3>Either Map</h3>
+                <pre data-trim data-noescape>
+Either&lt;L, R&gt;#map :: (R -> R2) -> Either&lt;L, R2&gt;;</pre>
+                <p>Just like Optional#map, if we have a failure case (left), this is a no-op.</p>
+            </section>
+            <section>
+                <h3>Either BiMapL and BiMapR</h3>
+                <pre data-trim data-noescape>
+Either&lt;L, R&gt;#biMapL :: (L -> L2) -> Either&lt;L2, R&gt;;
+Either&lt;L, R&gt;#biMapL :: (R -> R2) -> Either&lt;L, R2&gt;; // synonym for map. </pre>
+            </section>
+            <section>
+                <h3>Either flatMap</h3>
+                <pre data-trim data-noescape>
+Either&lt;L, R&gt;#flatMap :: (R -> Either&lt;L, R2&gt;) -> Either&lt;L, R2&gt;;</pre>
+            </section>
+            <section>
+                <h3>How do I get my values out?</h3>
+                <pre data-trim data-noescape>
+Either&lt;L, R&gt;#match :: (L -> T), (R -> T) -> T</pre>
+                <p>This is called unifying.</p>
+            </section>
+            <section>
+                <h3>Questions?</h3>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h3>Why?</h3>
+                <p>Obviously this is an interesting novelty, but I haven't sold you on why you should like these.</p>
+                <p>Especially Optional and Either, one of which is new, the other of which is Optional (pun
+                    intended).</p>
+            </section>
+            <section>
+                <h3>Lists/Stream</h3>
+                <p>The advantage of list is obvious</p>
+                <p>Obviously superior to a large number of similarly typed fields</p>
+                <p>Neatly represents the presence of 0 or more values at a type level</p>
+            </section>
+            <section>
+                <h3>Optional</h3>
+                <p>Represents the existence of 0 or 1 item at a type level.</p>
+                <p>Users forced to deal with the Optional, cannot forget the null check</p>
+                <p>Easily chain together a series of operations that may or may not fail with ease</p>
+            </section>
+            <section>
+                <h3>Either</h3>
+                <p>Represent the exclusive choice of L or R at a type level.</p>
+                <p>Make it impossible to accidentally mis-configure an object (e.g. two nulls or not enough nulls when
+                    fields are mutually exclusive)</p>
+                <p>Chain together a sequence of actions, each of which might fail with a reason together in a type safe
+                    way.</p>
+                <p>HackerNews street cred</p>
+            </section>
+        </section>
+        <section>
+            <h3>Bonus: Coproducts</h3>
+            <p>Either is a special CoProduct</p>
+            <p>Can be used to represent 2 or more mutually exclusive values</p>
+            <pre data-trim data-noescape>
+CoProduct3&lt;A, B, C&lt;</pre>
+        </section>
+        <section>
+            <section>
+                <h2>Recommendations</h2>
+            </section>
+            <section>
+                <h3>Stream map/flatMap</h3>
+                <p>Use them!</p>
+            </section>
+            <section>
+                <h3>Optional</h3>
+                <p>Use it any place that you expect nulls.</p>
+                <p>More type-safe than null, forces users to do the null check.</p>
+                <p>Warning: Too many Optionals in argument lists is a sign that you've got latent polymorphism happening</p>
+            </section>
+            <section>
+                <h3>Either</h3>
+                <p>Fits very nicely in two places</p>
+                <ul>
+                    <li>Domain: When two fields are mutually exclusive</li>
+                    <li>API: chaining together operations that might fail</li>
+                </ul>
+            </section>
+            <section>
+                <h3>CoProducts</h3>
+                <p>Cumbersome because of Java's syntax</p>
+                <p>Only recommended if you grok Optional and Either completely.</p>
+            </section>
+            <section>
+                <h3>Tiny Types</h3>
+                <p>I recommend combining tiny types with these types. Working with nothing but Either&lt;String, String&gt; will make you sad.</p>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h3>Questions?</h3>
+            </section>
+            <section>
+                <h3>Fin</h3>
+            </section>
+        </section>
+    </div>
+</div>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
 
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+<script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            }
+        ]
+    });
+</script>
+</body>
 </html>
