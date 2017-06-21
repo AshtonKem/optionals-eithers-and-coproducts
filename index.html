@@ -33,13 +33,13 @@
             <p>
                 Lambda
             </p>
-            <pre data-trim data-noescape>
-A -> B</pre>
+            <pre><code data-trim data-noescape>
+A -> B</code></pre>
             <p>
                 Code that accepts a Lamba
             </p>
-            <pre data-trim data-noescape>
-Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</pre>
+            <pre><code data-trim data-noescape>
+Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</code></pre>
         </section>
         <section>
             <section>
@@ -48,8 +48,8 @@ Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</pre>
             <section>
                 <h3>Map </h3>
                 <p>Given Stream of A and a function from A to B, we can make a Stream of B</p>
-                <pre data-trim data-noescape>
-Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</pre>
+                <pre><code data-trim data-noescape>
+Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</code></pre>
                 <p>Sadly this method is only on the new Stream class, not List</p>
             </section>
             <section>
@@ -63,11 +63,11 @@ Stream&lt;A&gt;#map :: (A -> B) -> Stream&lt;B&gt;;</pre>
             <section>
                 <h3>flatMap</h3>
                 <p>Given a Stream of A and a function from A to Stream of B, we can make a Stream of B</p>
-                <pre data-trim data-noescape>
-Stream&lt;A&gt;#flatMap :: (A -> Stream&lt;B&gt;) -> Stream&lt;B&gt;</pre>
+                <pre><code data-trim data-noescape>
+Stream&lt;A&gt;#flatMap :: (A -> Stream&lt;B&gt;) -> Stream&lt;B&gt;</code></pre>
                 <p>What if we just used map?</p>
-                <pre data-trim data-noescape>
-Stream&lt;A&gt;#map :: (A -> Stream&lt;B&gt;) -> Stream&lt;Stream&lt;B&gt&gt;</pre>
+                <pre><code data-trim data-noescape>
+Stream&lt;A&gt;#map :: (A -> Stream&lt;B&gt;) -> Stream&lt;Stream&lt;B&gt&gt;</code></pre>
             </section>
             <section>
                 <h3>Advantages of flatMap</h3>
@@ -103,16 +103,16 @@ Stream&lt;A&gt;#map :: (A -> Stream&lt;B&gt;) -> Stream&lt;Stream&lt;B&gt&gt;</p
             </section>
             <section>
                 <h3>Optional#map</h3>
-                <pre data-trim data-noescape>
-Optional&lt;A&gt;#map :: (A -> B) -> Optional&lt;B&gt;;</pre>
+                <pre><code data-trim data-noescape>
+Optional&lt;A&gt;#map :: (A -> B) -> Optional&lt;B&gt;;</code></pre>
                 <p>Chain together a series of transformations without checking for presence or absence until the
                     end.</p>
                 <p>If the Optional is empty, map is a no-op.</p>
             </section>
             <section>
                 <h3>Optional#flatMap</h3>
-                <pre data-trim data-noescape>
-Optional&lt;A&gt;#flatMap :: (A -> Optional&lt;B&gt;) -> Optional&lt;B&gt;;</pre>
+                <pre><code data-trim data-noescape>
+Optional&lt;A&gt;#flatMap :: (A -> Optional&lt;B&gt;) -> Optional&lt;B&gt;;</code></pre>
                 <p>Chain together a series of transformations that might each fail, without checking for presence or
                     absence explicitly.</p>
                 <p>flatMap is a no-op if the Optional is empty.</p>
@@ -125,10 +125,28 @@ Optional&lt;A&gt;#flatMap :: (A -> Optional&lt;B&gt;) -> Optional&lt;B&gt;;</pre
             </section>
             <section>
                 <h3>How do I get the value out?</h3>
-                <pre data-trim data-noescape>
-Optional&lt;A&lt;#isPresent :: boolean;
+                <pre><code data-trim data-noescape>
+Optional&lt;A&gt;#isPresent :: boolean;
 Optional&lt;A&gt;#get :: A; // Throws exceptions!
-Optional&lt;A&gt;#orElse :: A -> A;</pre>
+Optional&lt;A&gt;#orElse :: A -> A;</code></pre>
+            </section>
+            <section>
+                <h3>Example</h3>
+                <p>Old Way</p>
+                <pre><code data-trim data-noescape>String x = Helper.functionOne();
+if (x != null) {
+  x = Helper.functionTwo(x);
+  x = Helper.functionThree(x);
+  if (x != null) {
+    ...
+  }
+}</code></pre>
+                <p>New Way</p>
+                <pre>
+                    <code data-trim data-noescape>Optional&lt;String&gt; x = Helper.functionOne()
+                           .map(Helper::functionTwo)
+                           .flatMap(Helper::functionThree);</code>
+                </pre>
             </section>
             <section>
                 <h3>Questions?</h3>
@@ -145,9 +163,9 @@ Optional&lt;A&gt;#orElse :: A -> A;</pre>
                 <p>Either is usually represented an Either&lt;L, R&gt;</p>
                 <p>It represents either the existence of a L (left), or a R (right)</p>
                 <p>L and R may be the same types, or they might be distinct</p>
-                <pre data-trim data-noescape>
+                <pre><code data-trim data-noescape>
 Either.left(L);
-Either.right(R);</pre>
+Either.right(R);</code></pre>
             </section>
             <section>
                 <h3>A note on accidents of History</h3>
@@ -156,26 +174,39 @@ Either.right(R);</pre>
             </section>
             <section>
                 <h3>Either Map</h3>
-                <pre data-trim data-noescape>
-Either&lt;L, R&gt;#map :: (R -> R2) -> Either&lt;L, R2&gt;;</pre>
+                <pre><code data-trim data-noescape>
+Either&lt;L, R&gt;#map :: (R -> R2) -> Either&lt;L, R2&gt;;</code></pre>
                 <p>Just like Optional#map, if we have a failure case (left), this is a no-op.</p>
             </section>
             <section>
                 <h3>Either BiMapL and BiMapR</h3>
-                <pre data-trim data-noescape>
+                <pre><code data-trim data-noescape>
 Either&lt;L, R&gt;#biMapL :: (L -> L2) -> Either&lt;L2, R&gt;;
-Either&lt;L, R&gt;#biMapL :: (R -> R2) -> Either&lt;L, R2&gt;; // synonym for map. </pre>
+Either&lt;L, R&gt;#biMapR :: (R -> R2) -> Either&lt;L, R2&gt;;</code></pre>
+                <p>biMapR is a synonym for map</p>
             </section>
             <section>
                 <h3>Either flatMap</h3>
-                <pre data-trim data-noescape>
-Either&lt;L, R&gt;#flatMap :: (R -> Either&lt;L, R2&gt;) -> Either&lt;L, R2&gt;;</pre>
+                <pre><code data-trim data-noescape>
+Either&lt;L, R&gt;#flatMap :: (R -> Either&lt;L, R2&gt;) -> Either&lt;L, R2&gt;;</code></pre>
             </section>
             <section>
                 <h3>How do I get my values out?</h3>
-                <pre data-trim data-noescape>
-Either&lt;L, R&gt;#match :: (L -> T), (R -> T) -> T</pre>
+                <pre><code data-trim data-noescape>
+Either&lt;L, R&gt;#match :: (L -> T), (R -> T) -> T</code></pre>
                 <p>This is called unifying.</p>
+            </section>
+            <section>
+                <h3>Example</h3>
+                <pre>
+                    <code data-trim data-noescape>public HttpResponse handle(HttpRequest request) {
+    return JsonParser.parse(request.getBody())
+                     .flatMap(Validator::validate)
+                     .map(ServiceObject::businessLogic)
+                     .flatMap(JsonGenerator::generate)
+                     .match(l -> HttpResponse.internalServerError(l.getMessage()),
+                            r -> HttpResponse.ok(r));
+}</code></pre>
             </section>
             <section>
                 <h3>Questions?</h3>
@@ -214,8 +245,8 @@ Either&lt;L, R&gt;#match :: (L -> T), (R -> T) -> T</pre>
             <h3>Bonus: Coproducts</h3>
             <p>Either is a special CoProduct</p>
             <p>Can be used to represent 2 or more mutually exclusive values</p>
-            <pre data-trim data-noescape>
-CoProduct3&lt;A, B, C&lt;</pre>
+            <pre><code data-trim data-noescape>
+CoProduct3&lt;A, B, C&gt;</code></pre>
         </section>
         <section>
             <section>
